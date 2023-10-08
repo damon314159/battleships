@@ -1,11 +1,12 @@
 class Gameboard {
+  static size = 10
+
   constructor() {
     // Row, Column Matrix notation used throughout
-    const size = 10
-    // Create grid of 10x10 Matrix populated with null
-    this.grid = Array(size)
+    // Create grid of size x size Matrix populated with null
+    this.grid = Array(Gameboard.size)
       .fill(undefined)
-      .map(() => Array(size).fill(null))
+      .map(() => Array(Gameboard.size).fill(null))
     // Deep structured clone the grid to create hits matrix
     this.hits = structuredClone(this.grid)
   }
