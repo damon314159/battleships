@@ -19,6 +19,7 @@ const config = {
     '\\.(css|less)$': '<rootDir>/__mocks__/styleMock.js',
     '\\.(gif|ttf|eot|svg)$': '<rootDir>/__mocks__/fileMock.js'
   },
+  testMatch: ['<rootDir>/src/**/*.test.js'],
   setupFiles: ['./src/js-tests/setupTests.js']
 }
 
