@@ -1,0 +1,80 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.game-container {
+  display: flex;
+  margin-top: 20px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-gap: 5px;
+  border: 1px solid #ccc;
+  margin: 10px;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.cell.empty {
+  background-color: #add8e6;
+}
+
+.cell.ship {
+  background-color: #556b2f;
+}
+
+.cell.hit {
+  background-color: #ff6347;
+}
+
+.cell.miss {
+  background-color: #87ceeb;
+}
+
+.ship {
+  background-color: #556b2f;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #333;
+}
+
+.turn-indicator {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#player-waters,
+#enemy-waters {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#player-waters {
+  margin-right: 20px;
+}
+
+#enemy-waters {
+  margin-left: 20px;
+}
