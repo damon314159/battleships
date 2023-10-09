@@ -1,6 +1,6 @@
-import Player from './Player'
-import Gameboard from './Gameboard'
-import Ship from './Ship'
+import Player from '../js/Player'
+import Gameboard from '../js/Gameboard'
+import Ship from '../js/Ship'
 
 describe('Player class', () => {
   let homeBoard

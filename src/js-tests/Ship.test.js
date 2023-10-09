@@ -1,4 +1,4 @@
-import Ship from './Ship'
+import Ship from '../js/Ship'
 
 describe('Ship class', () => {
   test('should initialize correctly', () => {
