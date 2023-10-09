@@ -1,7 +1,10 @@
+import { v4 as uniqueID } from 'uuid'
+
 class Gameboard {
   static size = 10
 
-  constructor() {
+  constructor(ID = uniqueID()) {
+    this.ID = ID
     // Row, Column Matrix notation used throughout
     // Create grid of size x size Matrix populated with null
     this.grid = Array(Gameboard.size)
@@ -21,7 +24,7 @@ class Gameboard {
         throw new Error('Cell already occupied')
       }
       // Else set that cell to point to the ship
-      this.grid[rowPlacement][colPlacement] = ship
+      this.grid[rowPlacement][colPlacement] = { ship, shipID: ship.ID }
     }
   }
 
@@ -34,7 +37,7 @@ class Gameboard {
     // Else, mark a hit (true)
     this.hits[r][c] = true
     // Then call hit on the ship in that cell
-    this.grid[r][c].hit()
+    this.grid[r][c].ship.hit()
   }
 
   areAllSunk() {

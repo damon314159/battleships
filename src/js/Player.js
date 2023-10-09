@@ -1,8 +1,13 @@
+import { v4 as uniqueID } from 'uuid'
+
 class Player {
-  constructor(homeBoard, enemyBoard, isAI = false) {
+  constructor(homeBoard, enemyBoard, isAI, ID = uniqueID()) {
+    this.ID = ID
     // Give each player references to their board and opponent's board
     this.homeBoard = homeBoard
+    this.homeBoardID = homeBoard.ID
     this.enemyBoard = enemyBoard
+    this.enemyBoardID = enemyBoard.ID
     this.isAI = isAI
   }
 

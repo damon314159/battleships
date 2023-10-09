@@ -22,12 +22,12 @@ describe('Gameboard class', () => {
 
     // Check ship1 placement
     for (let i = 0; i < ship1.length; i += 1) {
-      expect(gameboard.grid[0][i]).toBe(ship1)
+      expect(gameboard.grid[0][i].ship).toBe(ship1)
     }
 
     // Check ship2 placement
     for (let i = 0; i < ship2.length; i += 1) {
-      expect(gameboard.grid[i + 1][0]).toBe(ship2)
+      expect(gameboard.grid[i + 1][0].ship).toBe(ship2)
     }
   })
 

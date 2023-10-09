@@ -1,5 +1,8 @@
+import { v4 as uniqueID } from 'uuid'
+
 class Ship {
-  constructor(length) {
+  constructor(length, ID = uniqueID()) {
+    this.ID = ID
     this.length = length
     this.hits = 0
     this._isSunk = false
