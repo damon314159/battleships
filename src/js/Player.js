@@ -34,6 +34,7 @@ class Player {
       throw new Error('Cell already attacked')
     }
     this.enemyBoard.receiveAttack(r, c)
+    return [r, c]
   }
 }
 
