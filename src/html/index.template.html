@@ -6,20 +6,33 @@
     <title>Battleships</title>
   </head>
   <body>
+    <div id="optionsModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Game Options</h2>
+        <label> <input type="checkbox" id="playerToggle" /> 1 Player Mode </label>
+        <button id="newGameBtn">New Game</button>
+        <button id="loadGameBtn">Load Game</button>
+        <button id="infoBtn">Info</button>
+      </div>
+    </div>
+
+    <div class="turn-indicator-wrapper wrapper">
+      <div class="turn-indicator">Admiral 1's Turn</div>
+      <div class="turn-indicator hidden">Admiral 2's Turn</div>
+    </div>
     <div class="game-container">
-      <div id="player-waters" class="game-board">
-        <h3 class="waters-indicator">Admiral 1's Waters</h3>
-        <div class="turn-indicator">Admiral 1's Turn</div>
-        <div id="player-board" class="board">
-          <!-- Player waters -->
+      <div id="home-waters" class="game-board">
+        <h3 class="waters-indicator">Home Waters</h3>
+        <div id="home-board" class="board">
+          <!-- Home waters -->
         </div>
-        <div id="player-ships">
-          <!-- Player's ships will be placed here dynamically -->
+        <div id="home-ships">
+          <!-- Home's ships will be placed here dynamically -->
         </div>
       </div>
       <div id="enemy-waters" class="game-board">
-        <h3 class="waters-indicator">Admiral 2's Waters</h3>
-        <div class="turn-indicator hidden">Admiral 2's Turn</div>
+        <h3 class="waters-indicator">Enemy Waters</h3>
         <div id="enemy-board" class="board">
           <!-- Enemy waters -->
         </div>

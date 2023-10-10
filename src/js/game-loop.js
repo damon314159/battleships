@@ -3,42 +3,38 @@ import Gameboard from './Gameboard'
 import Ship from './Ship'
 import helpersDOM from './helpersDOM'
 
-const playerWaters = document.getElementById('player-waters')
-const enemyWaters = document.getElementById('enemy-waters')
-
 // All pre-game setup and instantiation
-function game() {
-  // TODO local storage for an existing game
+function game(loadGameData = null) {
+  const homeWaters = document.getElementById('home-waters')
+  const enemyWaters = document.getElementById('enemy-waters')
+
   const board1 = new Gameboard()
   const board2 = new Gameboard()
-  const { size } = Gameboard
-  const player1 = (() => ({
-    playerInstance: new Player(board1, board2),
-    homeWater: helpersDOM.createWaters(size),
-    enemyWater: helpersDOM.createWaters(size),
-    homeBoard: board1,
-    enemyBoard: board2
-  }))()
-  const player2 = (() => ({
-    playerInstance: new Player(board2, board1, false),
-    homeWater: helpersDOM.createWaters(size),
-    enemyWater: helpersDOM.createWaters(size),
-    homeBoard: board2,
-    enemyBoard: board1
-  }))()
+  const player1 = new Player(board1, board2, false)
+  const player2 = new Player(board2, board1, true)
 
-  // TODO Temporary until manual placing implemented
-  player1.homeBoard.placeShip(new Ship(5), 0, 0, 'horizontal')
-  player1.homeBoard.placeShip(new Ship(4), 1, 1, 'horizontal')
-  player1.homeBoard.placeShip(new Ship(3), 2, 2, 'horizontal')
-  player1.homeBoard.placeShip(new Ship(3), 3, 3, 'horizontal')
-  player1.homeBoard.placeShip(new Ship(2), 4, 4, 'horizontal')
-  player2.homeBoard.placeShip(new Ship(5), 4, 4, 'vertical')
-  player2.homeBoard.placeShip(new Ship(4), 5, 5, 'vertical')
-  player2.homeBoard.placeShip(new Ship(3), 6, 6, 'vertical')
-  player2.homeBoard.placeShip(new Ship(3), 7, 7, 'vertical')
-  player2.homeBoard.placeShip(new Ship(2), 8, 8, 'vertical')
-  // ^^^ Temporary until manual placing implemented ^^^
+  let turnPlayer = player1
+  let turnCounter = 0
+
+  if (loadGameData) {
+    // TODO If storedData, enable load game button
+    // TODO take gameboard.hits/grid from local storage when load game,
+    // to replace instantiated objects arrays with
+  } else {
+    // TODO Temporary until manual placing implemented
+    player1.homeBoard.placeShip(new Ship(5), 0, 0, 'horizontal')
+    player1.homeBoard.placeShip(new Ship(4), 1, 1, 'horizontal')
+    player1.homeBoard.placeShip(new Ship(3), 2, 2, 'horizontal')
+    player1.homeBoard.placeShip(new Ship(3), 3, 3, 'horizontal')
+    player1.homeBoard.placeShip(new Ship(2), 4, 4, 'horizontal')
+    player2.homeBoard.placeShip(new Ship(5), 4, 4, 'vertical')
+    player2.homeBoard.placeShip(new Ship(4), 5, 5, 'vertical')
+    player2.homeBoard.placeShip(new Ship(3), 6, 6, 'vertical')
+    player2.homeBoard.placeShip(new Ship(3), 7, 7, 'vertical')
+    player2.homeBoard.placeShip(new Ship(2), 8, 8, 'vertical')
+    // ^^^ Temporary until manual placing implemented ^^^
+  }
+  helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
 
   // Function to wait for a click event on enemy waters
   function waitForClick() {
@@ -53,10 +49,6 @@ function game() {
     })
   }
 
-  let turnPlayer = player1
-  let turnCounter = 0
-  helpersDOM.renderBoards(turnPlayer, playerWaters, enemyWaters)
-
   // Turn by turn logic
   async function mainGameLoopIteration() {
     // Start of turn, player can now click a square to attack
@@ -64,7 +56,7 @@ function game() {
     // Wait for the click event
     try {
       helpersDOM.delegateAttackClick(event, turnPlayer)
-      helpersDOM.renderBoards(turnPlayer, playerWaters, enemyWaters)
+      helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
       if (turnPlayer.enemyBoard.areAllSunk()) {
         // Break out of loop with a truthy return upon win condition
         return true
@@ -79,11 +71,11 @@ function game() {
     turnCounter += 1
 
     // If computer player, generate a move now
-    if (player2.playerInstance.isAI) {
+    if (player2.isAI) {
       // Send an attack
-      player2.playerInstance.sendAttack()
+      player2.sendAttack()
       // Render the change
-      helpersDOM.renderBoards(turnPlayer, playerWaters, enemyWaters)
+      helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
       // Update turn counter and toggle indicators
       helpersDOM.toggleTurnIndicator()
       turnCounter += 1
@@ -97,7 +89,7 @@ function game() {
     // If 2 player mode, prepare for handover
     // TODO function to wait until handover button pressed
     turnPlayer = turnCounter % 2 ? player2 : player1
-    helpersDOM.renderBoards(turnPlayer, playerWaters, enemyWaters)
+    helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
     return false
   }
 

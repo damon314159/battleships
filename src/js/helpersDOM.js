@@ -1,25 +1,16 @@
 const helpersDOM = {
-  renderBoards: function renderBoards(turnPlayer, playerWaters, enemyWaters) {
-    const playerBoard = playerWaters.querySelector('.board')
-    const enemyBoard = enemyWaters.querySelector('.board')
-    // Clear existing boards if any
-    while (playerBoard.firstChild) {
-      playerBoard.removeChild(playerBoard.firstChild)
-    }
-    while (enemyBoard.firstChild) {
-      enemyBoard.removeChild(enemyBoard.firstChild)
-    }
+  renderBoards: function renderBoards(turnPlayer, homeWaters, enemyWaters) {
+    const homeBoardCells = homeWaters.querySelectorAll('.board>*')
+    const enemyBoardCells = enemyWaters.querySelectorAll('.board>*')
     // Populate new boards
-    turnPlayer.homeWater.forEach((cell) => {
+    homeBoardCells.forEach((cell) => {
       const [r, c] = helpersDOM.getCellCoordinates(cell)
       helpersDOM.markShip(cell, turnPlayer.homeBoard, r, c)
       helpersDOM.updateCellType(cell, turnPlayer.homeBoard, r, c)
-      playerBoard.appendChild(cell)
     })
-    turnPlayer.enemyWater.forEach((cell) => {
+    enemyBoardCells.forEach((cell) => {
       const [r, c] = helpersDOM.getCellCoordinates(cell)
       helpersDOM.updateCellType(cell, turnPlayer.enemyBoard, r, c)
-      enemyBoard.appendChild(cell)
     })
   },
 
@@ -35,18 +26,16 @@ const helpersDOM = {
     turnPlayer.enemyBoard.receiveAttack(r, c)
   },
 
-  createWaters: function createWaters(size) {
-    const cells = []
+  createWaters: function createWaters(parentElement, size) {
     for (let r = 0; r < size; r += 1) {
       for (let c = 0; c < size; c += 1) {
         const cell = document.createElement('div')
         cell.classList.add('cell', 'empty')
         cell.dataset.r = r
         cell.dataset.c = c
-        cells.push(cell)
+        parentElement.appendChild(cell)
       }
     }
-    return cells
   },
 
   toggleTurnIndicator: function toggleTurnIndicator() {
