@@ -22,28 +22,46 @@ describe('helpersDOM module', () => {
     enemyGameboard = new Gameboard()
     playerWaters = document.createElement('div')
     enemyWaters = document.createElement('div')
-    const playerBoardDiv = document.createElement('div')
-    const enemyBoardDiv = document.createElement('div')
-    playerBoardDiv.classList.add('board')
-    enemyBoardDiv.classList.add('board')
-    playerWaters.appendChild(playerBoardDiv)
-    enemyWaters.appendChild(enemyBoardDiv)
+
+    const createBoardDiv = () => {
+      const boardDiv = document.createElement('div')
+      boardDiv.classList.add('board')
+      return boardDiv
+    }
+
+    playerWaters.appendChild(createBoardDiv())
+    enemyWaters.appendChild(createBoardDiv())
+
+    const { size } = Gameboard
+    helpersDOM.createWaters(playerWaters.firstChild, size)
+    helpersDOM.createWaters(enemyWaters.firstChild, size)
+
     player = {
       homeBoard: playerGameboard,
-      enemyBoard: enemyGameboard,
-      homeWater: helpersDOM.createWaters(Gameboard.size),
-      enemyWater: helpersDOM.createWaters(Gameboard.size)
+      enemyBoard: enemyGameboard
     }
   })
 
   test('createWaters should create a grid of empty cells', () => {
     const size = 3
-    const cells = helpersDOM.createWaters(size)
+    const parentElement = document.createElement('div')
+    helpersDOM.createWaters(parentElement, size)
+    const cells = Array.from(parentElement.children)
 
     expect(cells.length).toBe(size * size)
     cells.forEach((cell) => {
       expect(cell.classList.contains('empty')).toBe(true)
     })
+  })
+
+  test('createWaters should handle a size of 1', () => {
+    const size = 1
+    const parentElement = document.createElement('div')
+    helpersDOM.createWaters(parentElement, size)
+    const cells = Array.from(parentElement.children)
+
+    expect(cells.length).toBe(1)
+    expect(cells[0].classList.contains('empty')).toBe(true)
   })
 
   test('updateCellType should update the cell styling based on gameboard state', () => {
@@ -108,14 +126,6 @@ describe('helpersDOM module', () => {
     expect(resultCellElement.dataset.c).toBe('2')
   })
 
-  test('createWaters should handle a size of 1', () => {
-    const size = 1
-    const cells = helpersDOM.createWaters(size)
-
-    expect(cells.length).toBe(1)
-    expect(cells[0].classList.contains('empty')).toBe(true)
-  })
-
   test('updateCellType should handle a null cell state', () => {
     const [r, c] = [0, 0]
 
@@ -127,17 +137,6 @@ describe('helpersDOM module', () => {
     helpersDOM.updateCellType(cell, gameboard, r, c)
 
     expect(cell.classList.contains('empty')).toBe(true)
-  })
-
-  test('markShip should add "ship" class for a ship cell', () => {
-    const cell = document.createElement('div')
-    cell.classList.add('cell')
-    const [r, c] = [0, 0]
-    gameboard.placeShip(new Ship(3), r, c, 'horizontal')
-
-    helpersDOM.markShip(cell, gameboard, r, c)
-
-    expect(cell.classList.contains('ship')).toBe(true)
   })
 
   test('markShip should add "ship" class for a ship cell', () => {
