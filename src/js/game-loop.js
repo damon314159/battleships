@@ -4,21 +4,21 @@ import Ship from './Ship'
 import helpersDOM from './helpersDOM'
 
 // All pre-game setup and instantiation
-function game(loadGameData = null) {
+function game(isVsComputer, loadGameData = null) {
   const homeWaters = document.getElementById('home-waters')
   const enemyWaters = document.getElementById('enemy-waters')
 
   const board1 = new Gameboard()
   const board2 = new Gameboard()
   const player1 = new Player(board1, board2, false)
-  const player2 = new Player(board2, board1, true)
+  const player2 = new Player(board2, board1, isVsComputer)
 
   let turnPlayer = player1
   let turnCounter = 0
 
   if (loadGameData) {
     // TODO If storedData, enable load game button
-    // TODO take gameboard.hits/grid from local storage when load game,
+    // take gameboard.hits/grid from local storage when load game,
     // to replace instantiated objects arrays with
   } else {
     // TODO Temporary until manual placing implemented
@@ -38,7 +38,7 @@ function game(loadGameData = null) {
 
   // Function to wait for a click event on enemy waters
   function waitForClick() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const clickHandler = (event) => {
         // Remove the event listener to avoid multiple resolutions
         enemyWaters.removeEventListener('click', clickHandler)
@@ -46,6 +46,14 @@ function game(loadGameData = null) {
       }
       // Add the click listener to be waited on
       enemyWaters.addEventListener('click', clickHandler)
+
+      // Add a way to interrupt the game-loop while async
+      const newGameBtn = document.getElementById('newGameBtn')
+      const interruptHandler = () => {
+        newGameBtn.removeEventListener('click', interruptHandler)
+        reject(new Error('Interrupt requested'))
+      }
+      newGameBtn.addEventListener('click', interruptHandler)
     })
   }
 
@@ -96,10 +104,15 @@ function game(loadGameData = null) {
   // Setup concluded, start the turns
   ;(async function mainGameLoop() {
     for (;;) {
-      // Wait for each move before continuing
-      // eslint-disable-next-line no-await-in-loop
-      if (await mainGameLoopIteration()) break
-      // Break on a true return, indicative of a winner
+      try {
+        // Wait for each move before continuing
+        // eslint-disable-next-line no-await-in-loop
+        if (await mainGameLoopIteration()) break
+        // Break on a true return, indicative of a winner
+      } catch {
+        // Loop interrupted
+        break
+      }
     }
   })()
 }
