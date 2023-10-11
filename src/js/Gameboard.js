@@ -19,6 +19,10 @@ class Gameboard {
     for (let i = 0; i < ship.length; i += 1) {
       const rowPlacement = direction === 'vertical' ? r + i : r
       const colPlacement = direction === 'horizontal' ? c + i : c
+      // If a cell of the ship would be off grid
+      if (rowPlacement >= Gameboard.size || colPlacement >= Gameboard.size) {
+        return false
+      }
       // If that cell is full, the ship overlaps an existing ship
       if (this.grid[rowPlacement][colPlacement]) {
         return false
