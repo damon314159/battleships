@@ -81,6 +81,78 @@ const helpersDOM = {
   getCellElement: function getCellElement(parentElement, r, c) {
     const cellSelector = `.cell[data-r="${r}"][data-c="${c}"]`
     return parentElement.querySelector(cellSelector)
+  },
+
+  highlightShipPlacement: function highlightShipPlacement(event, player, ship) {
+    if (!event.target.classList.contains('cell')) return
+    const direction = event.shiftKey ? 'vertical' : 'horizontal'
+    const [startRow, startCol] = helpersDOM.getCellCoordinates(event.target)
+
+    const valid = player.homeBoard.isValidPlacement(ship, startRow, startCol, direction)
+
+    for (let i = 0; i < ship.length; i += 1) {
+      const r = direction === 'vertical' ? startRow + i : startRow
+      const c = direction === 'horizontal' ? startCol + i : startCol
+      const cell = helpersDOM.getCellElement(event.currentTarget.querySelector('.board'), r, c)
+      if (!cell) return
+      cell.classList.add(valid ? 'valid-place' : 'invalid-place')
+    }
+  },
+
+  clearHighlight: function clearHighlight(event) {
+    const cells = event.currentTarget.querySelectorAll('.cell.valid-place, .cell.invalid-place')
+    cells.forEach((cell) => cell.classList.remove('valid-place', 'invalid-place'))
+  },
+
+  delegatePlaceClick: function delegatePlaceClick(event, player, ship) {
+    if (!event.target.classList.contains('cell')) {
+      return false
+    }
+    const direction = event.shiftKey ? 'vertical' : 'horizontal'
+    const [r, c] = helpersDOM.getCellCoordinates(event.target)
+
+    if (!player.homeBoard.isValidPlacement(ship, r, c, direction)) {
+      return false
+    }
+    player.homeBoard.placeShip(ship, r, c, direction)
+    return true
+  },
+
+  waitForPlacement: function waitForPlacement(homeWaters) {
+    return new Promise((resolve) => {
+      const clickHandler = (event) => {
+        homeWaters.removeEventListener('click', clickHandler)
+        resolve(event)
+      }
+
+      // Add the click listener to be waited on
+      homeWaters.addEventListener('click', clickHandler)
+    })
+  },
+
+  waitForAttack: function waitForAttack(enemyWaters) {
+    return new Promise((resolve, reject) => {
+      const newGameBtn = document.getElementById('newGameBtn')
+
+      const clickHandler = (event) => {
+        // Remove the event listener to avoid multiple resolutions
+        enemyWaters.removeEventListener('click', clickHandler)
+        // eslint-disable-next-line no-use-before-define
+        newGameBtn.removeEventListener('click', interruptHandler)
+        resolve(event)
+      }
+      // Add a way to interrupt the game-loop while async
+      const interruptHandler = () => {
+        newGameBtn.removeEventListener('click', interruptHandler)
+        enemyWaters.removeEventListener('click', clickHandler)
+
+        reject(new Error('Interrupt requested'))
+      }
+
+      // Add the click listener to be waited on
+      enemyWaters.addEventListener('click', clickHandler)
+      newGameBtn.addEventListener('click', interruptHandler)
+    })
   }
 }
 

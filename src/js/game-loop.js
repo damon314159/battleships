@@ -1,10 +1,11 @@
+/* eslint-disable no-await-in-loop */
 import Player from './Player'
 import Gameboard from './Gameboard'
 import Ship from './Ship'
 import helpersDOM from './helpersDOM'
 
 // All pre-game setup and instantiation
-function game(isVsComputer, loadGameData = null) {
+async function game(isVsComputer, loadGameData = null) {
   const homeWaters = document.getElementById('home-waters')
   const enemyWaters = document.getElementById('enemy-waters')
 
@@ -16,51 +17,67 @@ function game(isVsComputer, loadGameData = null) {
   let turnPlayer = player1
   let turnCounter = 0
 
+  async function awaitValidPlacement(player, ship) {
+    for (;;) {
+      const hoverCallback = (event) => helpersDOM.highlightShipPlacement(event, player, ship)
+      const unhoverCallback = (event) => helpersDOM.clearHighlight(event)
+      homeWaters.addEventListener('mouseover', hoverCallback)
+      homeWaters.addEventListener('mouseout', unhoverCallback)
+      const event = await helpersDOM.waitForPlacement(homeWaters)
+      // Break on true return, signify successful placement
+      if (helpersDOM.delegatePlaceClick(event, player, ship)) {
+        homeWaters.removeEventListener('mouseover', hoverCallback)
+        homeWaters.removeEventListener('mouseover', unhoverCallback)
+        break
+      }
+    }
+  }
+  const player1Ships = [new Ship(5), new Ship(4), new Ship(3), new Ship(3), new Ship(2)]
+  const player2Ships = [new Ship(5), new Ship(4), new Ship(3), new Ship(3), new Ship(2)]
+
   if (loadGameData) {
     // TODO If storedData, enable load game button
     // take gameboard.hits/grid from local storage when load game,
     // to replace instantiated objects arrays with
   } else {
-    // TODO Temporary until manual placing implemented
-    player1.homeBoard.placeShip(new Ship(5), 0, 0, 'horizontal')
-    player1.homeBoard.placeShip(new Ship(4), 1, 1, 'horizontal')
-    player1.homeBoard.placeShip(new Ship(3), 2, 2, 'horizontal')
-    player1.homeBoard.placeShip(new Ship(3), 3, 3, 'horizontal')
-    player1.homeBoard.placeShip(new Ship(2), 4, 4, 'horizontal')
-    player2.homeBoard.placeShip(new Ship(5), 4, 4, 'vertical')
-    player2.homeBoard.placeShip(new Ship(4), 5, 5, 'vertical')
-    player2.homeBoard.placeShip(new Ship(3), 6, 6, 'vertical')
-    player2.homeBoard.placeShip(new Ship(3), 7, 7, 'vertical')
-    player2.homeBoard.placeShip(new Ship(2), 8, 8, 'vertical')
-    // ^^^ Temporary until manual placing implemented ^^^
+    for (let i = 0; i < player1Ships.length; i += 1) {
+      await awaitValidPlacement(player1, player1Ships[i])
+      helpersDOM.renderBoards(player1, homeWaters, enemyWaters)
+    }
+    if (player2.isAI) {
+      // Simple random placement
+      while (player2Ships.length) {
+        const direction = Math.floor(Math.random() * 2) ? 'vertical' : 'horizontal'
+        const r = Math.floor(
+          Math.random() * (direction === 'vertical' ? Gameboard.size + 1 - player2Ships[0].length : Gameboard.size)
+        )
+        const c = Math.floor(
+          Math.random() * (direction === 'horizontal' ? Gameboard.size + 1 - player2Ships[0].length : Gameboard.size)
+        )
+        try {
+          player2.homeBoard.placeShip(player2Ships[0], r, c, direction)
+          // If placement successful, remove that ship from array to be placed
+          player2Ships.shift()
+        } catch {
+          // If the placement was invalid, try again
+        }
+      }
+    } else {
+      // TODO Handover screen
+      helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
+      for (let i = 0; i < player2Ships.length; i += 1) {
+        await awaitValidPlacement(player2, player2Ships[i])
+        helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
+      }
+      // TODO Handover screen
+    }
   }
   helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
-
-  // Function to wait for a click event on enemy waters
-  function waitForClick() {
-    return new Promise((resolve, reject) => {
-      const clickHandler = (event) => {
-        // Remove the event listener to avoid multiple resolutions
-        enemyWaters.removeEventListener('click', clickHandler)
-        resolve(event)
-      }
-      // Add the click listener to be waited on
-      enemyWaters.addEventListener('click', clickHandler)
-
-      // Add a way to interrupt the game-loop while async
-      const newGameBtn = document.getElementById('newGameBtn')
-      const interruptHandler = () => {
-        newGameBtn.removeEventListener('click', interruptHandler)
-        reject(new Error('Interrupt requested'))
-      }
-      newGameBtn.addEventListener('click', interruptHandler)
-    })
-  }
 
   // Turn by turn logic
   async function mainGameLoopIteration() {
     // Start of turn, player can now click a square to attack
-    const event = await waitForClick()
+    const event = await helpersDOM.waitForAttack(enemyWaters)
     // Wait for the click event
     try {
       helpersDOM.delegateAttackClick(event, turnPlayer)
@@ -95,26 +112,23 @@ function game(isVsComputer, loadGameData = null) {
     }
 
     // If 2 player mode, prepare for handover
-    // TODO function to wait until handover button pressed
+    // TODO Handover screen
     turnPlayer = turnCounter % 2 ? player2 : player1
     helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
     return false
   }
 
   // Setup concluded, start the turns
-  ;(async function mainGameLoop() {
-    for (;;) {
-      try {
-        // Wait for each move before continuing
-        // eslint-disable-next-line no-await-in-loop
-        if (await mainGameLoopIteration()) break
-        // Break on a true return, indicative of a winner
-      } catch {
-        // Loop interrupted
-        break
-      }
+  for (;;) {
+    try {
+      // Wait for each move before continuing
+      if (await mainGameLoopIteration()) break
+      // Break on a true return, indicative of a winner
+    } catch {
+      // Loop interrupted
+      break
     }
-  })()
+  }
 }
 
 export default game
