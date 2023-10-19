@@ -1,5 +1,6 @@
 const menu = {
   prepareMenu: function prepareMenu(game) {
+    // Target all menu controls
     const openOptionsBtn = document.getElementById('open-options-btn')
     const closeOptionsModalBtn = document.getElementById('close-options-modal')
     const newGameBtn = document.getElementById('new-game-btn')
@@ -13,19 +14,9 @@ const menu = {
 
     function openModal(modal) {
       modal.style.display = 'block'
-      // Check local storage to determine if loadGame button enabled
     }
-
     function closeModal(modal) {
       modal.style.display = 'none'
-    }
-
-    function startGame() {
-      const isVsComputer = playerToggle.checked
-      game(isVsComputer)
-      // Remove any existing save-game to keep LS tidy
-      localStorage.clear()
-      closeModal(optionsModal)
     }
 
     function showDropdown() {
@@ -35,18 +26,32 @@ const menu = {
       document.getElementById('no-saved-game-dropdown').style.display = 'none'
     }
 
+    function startGame() {
+      // Read user input on single player vs two player
+      const isVsComputer = playerToggle.checked
+      // Begin the new game
+      game(isVsComputer)
+      // Remove any existing save-game to keep LS tidy
+      localStorage.clear()
+      closeModal(optionsModal)
+    }
+
     function loadGame() {
+      // Attempt to retrieve a saved game from local storage
       const gameState = JSON.parse(localStorage.getItem('gameState'))
       if (!gameState) {
+        // If there was no such saved game, show a small pop-up to convey this
         showDropdown()
         return
       }
+      // Else begin the game, starting from the existing save
       game(gameState.players.player2.isAI, gameState)
       // Remove the now loaded save-game to keep LS tidy
       localStorage.clear()
       closeModal(optionsModal)
     }
 
+    // Attach all functions to their appropriate menu controls
     openOptionsBtn.addEventListener('click', () => openModal(optionsModal))
     closeOptionsModalBtn.addEventListener('click', () => closeModal(optionsModal))
     newGameBtn.addEventListener('click', startGame)

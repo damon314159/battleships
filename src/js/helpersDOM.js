@@ -1,9 +1,11 @@
 /* eslint-disable no-await-in-loop */
 const helpersDOM = {
+  // Render the gameboards that should be visible onto the DOM waters
   renderBoards: function renderBoards(turnPlayer, homeWaters, enemyWaters) {
     const homeBoardCells = homeWaters.querySelectorAll('.board>*')
     const enemyBoardCells = enemyWaters.querySelectorAll('.board>*')
-    // Populate new boards
+
+    // Populate the board cells with the appropriate classes for their state
     homeBoardCells.forEach((cell) => {
       const [r, c] = helpersDOM.getCellCoordinates(cell)
       helpersDOM.markShip(cell, turnPlayer.homeBoard, r, c)
@@ -15,14 +17,18 @@ const helpersDOM = {
     })
   },
 
+  // Show blank copies of the grids to hide information while switching players
   renderBlankBoards: function renderBlankBoards() {
     const cells = document.querySelectorAll('.board>*')
+    // Remove any classes that would visually giveaway information
     cells.forEach((cell) => {
       cell.classList.remove('ship', 'hit', 'miss')
       cell.classList.add('cell', 'empty')
     })
   },
 
+  // Take the event from anywhere on the enemy waters,
+  // and delegate that event to the appropriate cell
   delegateAttackClick: function delegateAttackClick(event, turnPlayer) {
     if (!event.target.classList.contains('cell')) {
       throw new Error('Click was not on a cell')
@@ -32,9 +38,12 @@ const helpersDOM = {
     if (turnPlayer.enemyBoard.hits[r][c] !== null) {
       throw new Error('Cell already attacked')
     }
+    // Providing the click was on a cell and that cell was yet to be attacked,
+    // call the method to make that attack
     turnPlayer.enemyBoard.receiveAttack(r, c)
   },
 
+  // Simple loop to generate the cell divs
   createWaters: function createWaters(parentElement, size) {
     for (let r = 0; r < size; r += 1) {
       for (let c = 0; c < size; c += 1) {
@@ -53,6 +62,7 @@ const helpersDOM = {
     })
   },
 
+  // Apply the ship class to a cell if it contains a reference to a ship object
   markShip: function markShip(cell, gameboard, r, c) {
     cell.classList.remove('ship')
     if (gameboard.grid[r][c]) {
@@ -81,6 +91,7 @@ const helpersDOM = {
     }
   },
 
+  // Two helpers to turn a cell element into its coordinates and vice versa
   getCellCoordinates: function getCellCoordinates(cellElement) {
     const r = parseInt(cellElement.dataset.r, 10)
     const c = parseInt(cellElement.dataset.c, 10)
@@ -92,13 +103,18 @@ const helpersDOM = {
     return parentElement.querySelector(cellSelector)
   },
 
+  // While the user is placing their ships, highlight all the cells the ship would occupy
+  // as the user hovers their mouse over various points of their waters
   highlightShipPlacement: function highlightShipPlacement(event, player, ship) {
     if (!event.target.classList.contains('cell')) return
+    // Shift key is used to determine the direction of the ship placement
     const direction = event.shiftKey ? 'vertical' : 'horizontal'
     const [startRow, startCol] = helpersDOM.getCellCoordinates(event.target)
 
+    // Test validity if the ship were to be placed in this location
     const valid = player.homeBoard.isValidPlacement(ship, startRow, startCol, direction)
 
+    // For each cell that the ship would occupy, colour it according to the previous validity
     for (let i = 0; i < ship.length; i += 1) {
       const r = direction === 'vertical' ? startRow + i : startRow
       const c = direction === 'horizontal' ? startCol + i : startCol
@@ -108,28 +124,36 @@ const helpersDOM = {
     }
   },
 
+  // Remove the highlighting from the previous function as required
   clearHighlight: function clearHighlight(event) {
     const cells = event.currentTarget.querySelectorAll('.cell.valid-place, .cell.invalid-place')
     cells.forEach((cell) => cell.classList.remove('valid-place', 'invalid-place'))
   },
 
+  // Take the event from anywhere on the home waters,
+  // and delegate that event to the appropriate cell
   delegatePlaceClick: function delegatePlaceClick(event, player, ship) {
     if (!event.target.classList.contains('cell')) {
       return false
     }
+    // Place the ship according to the event target's coordinates and shift key direction
     const direction = event.shiftKey ? 'vertical' : 'horizontal'
     const [r, c] = helpersDOM.getCellCoordinates(event.target)
 
+    // If it would be invalid, return false and do not place
     if (!player.homeBoard.isValidPlacement(ship, r, c, direction)) {
       return false
     }
+    // Else place the ship and return true to signal success
     player.homeBoard.placeShip(ship, r, c, direction)
     return true
   },
 
+  // Create a promise for a click event when placing ships on home waters
   waitForPlacement: function waitForPlacement(homeWaters) {
     return new Promise((resolve) => {
       const clickHandler = (event) => {
+        // The promise will only be resolved when the handler is triggered
         homeWaters.removeEventListener('click', clickHandler)
         resolve(event)
       }
@@ -139,15 +163,19 @@ const helpersDOM = {
     })
   },
 
+  // Placement flow control
+  // Ensures highlighting, waiting for clicks, and event delegation happen in order
   awaitValidPlacement: async function awaitValidPlacement(player, ship, homeWaters) {
+    // Attach the hover highlighting listeners
     const hoverCallback = (event) => helpersDOM.highlightShipPlacement(event, player, ship)
     const unhoverCallback = (event) => helpersDOM.clearHighlight(event)
     homeWaters.addEventListener('mouseover', hoverCallback)
     homeWaters.addEventListener('mouseout', unhoverCallback)
+    // Infinite loop so that unsuccessful placement clicks can be reattempted
     for (;;) {
       const event = await helpersDOM.waitForPlacement(homeWaters)
-      // Break on true return, signify successful placement
       if (helpersDOM.delegatePlaceClick(event, player, ship)) {
+        // Break on true return, signifying a successful placement
         homeWaters.removeEventListener('mouseover', hoverCallback)
         homeWaters.removeEventListener('mouseover', unhoverCallback)
         break
@@ -155,6 +183,7 @@ const helpersDOM = {
     }
   },
 
+  // Create a promise for a click event when attacking enemy waters
   waitForAttack: function waitForAttack(enemyWaters) {
     return new Promise((resolve, reject) => {
       const newGameBtn = document.getElementById('newGameBtn')
@@ -167,6 +196,8 @@ const helpersDOM = {
         resolve(event)
       }
       // Add a way to interrupt the game-loop while async
+      // This is required if a new game were to be started,
+      // such that the old one can be cancelled
       const interruptHandler = () => {
         newGameBtn.removeEventListener('click', interruptHandler)
         enemyWaters.removeEventListener('click', clickHandler)
@@ -180,13 +211,18 @@ const helpersDOM = {
     })
   },
 
+  // Create a screen to tell the users when to pass the device in two player mode
+  // Includes a backdrop to obfuscate the state of the game during handover
   openHandoverScreen: async function openHandoverScreen(delay, message) {
+    // A small pause to allow the outgoing player to see the results of their move
     await new Promise((resolve) => {
       setTimeout(resolve, delay)
     })
 
+    // Hide any sensitive game info - tactics beware!
     helpersDOM.renderBlankBoards()
 
+    // Create the screen itself
     const wrapper = document.createElement('div')
     wrapper.classList.add('handover-wrapper')
     const handover = document.createElement('div')
@@ -200,11 +236,14 @@ const helpersDOM = {
     btn.classList.add('handover-button')
     btn.innerText = 'Click to continue'
 
+    // Attach it all to the DOM
     handover.appendChild(messageElement)
     handover.appendChild(btn)
     wrapper.appendChild(handover)
     document.body.appendChild(wrapper)
 
+    // A promise to close the screen when the button is clicked
+    // This is so that the game can be made to wait in the background
     return new Promise((resolve) => {
       btn.addEventListener('click', () => {
         wrapper.remove()
