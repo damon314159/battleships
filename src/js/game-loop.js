@@ -46,18 +46,18 @@ async function game(isVsComputer, loadGameData = null) {
     }
     if (player2.isAI) {
       // Simple random placement
-      while (player2Ships.length) {
+      for (let i = 0; i < player2Ships.length; ) {
         const direction = Math.floor(Math.random() * 2) ? 'vertical' : 'horizontal'
         const r = Math.floor(
-          Math.random() * (direction === 'vertical' ? Gameboard.size + 1 - player2Ships[0].length : Gameboard.size)
+          Math.random() * (direction === 'vertical' ? Gameboard.size + 1 - player2Ships[i].length : Gameboard.size)
         )
         const c = Math.floor(
-          Math.random() * (direction === 'horizontal' ? Gameboard.size + 1 - player2Ships[0].length : Gameboard.size)
+          Math.random() * (direction === 'horizontal' ? Gameboard.size + 1 - player2Ships[i].length : Gameboard.size)
         )
         try {
-          player2.homeBoard.placeShip(player2Ships[0], r, c, direction)
-          // If placement successful, remove that ship from array to be placed
-          player2Ships.shift()
+          player2.homeBoard.placeShip(player2Ships[i], r, c, direction)
+          // If placement successful, increment the loop counter to the next ship
+          i += 1
         } catch {
           // If the placement was invalid, try again
         }
