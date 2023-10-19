@@ -28,7 +28,8 @@ const menu = {
     function loadGame() {
       const gameState = JSON.parse(localStorage.getItem('gameState'))
       if (!gameState) {
-        alert('No saved game') // TODO proper no save message. Red border on button + dialogue?
+        // TODO proper no save message. Red border on button + dialogue?
+        alert('No saved game')
         return
       }
       game(gameState.players.player2.isAI, gameState)

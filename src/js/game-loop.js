@@ -36,6 +36,7 @@ async function game(isVsComputer, loadGameData = null) {
     ))
     if (turnCounter % 2) helpersDOM.toggleTurnIndicator()
   } else {
+    await helpersDOM.openHandoverScreen(2000, 'Time for admiral 1 to organise their fleet!')
     for (let i = 0; i < player1Ships.length; i += 1) {
       await helpersDOM.awaitValidPlacement(player1, player1Ships[i], homeWaters)
       helpersDOM.renderBoards(player1, homeWaters, enemyWaters)
@@ -59,13 +60,15 @@ async function game(isVsComputer, loadGameData = null) {
         }
       }
     } else {
-      // TODO Handover screen
+      await helpersDOM.openHandoverScreen(2000, 'Time for admiral 2 to organise their fleet!')
+      helpersDOM.toggleTurnIndicator()
       helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
       for (let i = 0; i < player2Ships.length; i += 1) {
         await helpersDOM.awaitValidPlacement(player2, player2Ships[i], homeWaters)
         helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
       }
-      // TODO Handover screen
+      await helpersDOM.openHandoverScreen(2000, `Let the game begin! Admiral 1's turn`)
+      helpersDOM.toggleTurnIndicator()
     }
   }
   helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
@@ -87,9 +90,6 @@ async function game(isVsComputer, loadGameData = null) {
       // Then a new click can be waited for without changing player
       return false
     }
-    // Update turn counter and toggle indicators
-    helpersDOM.toggleTurnIndicator()
-    turnCounter += 1
 
     // If computer player, generate a move now
     if (player2.isAI) {
@@ -97,9 +97,6 @@ async function game(isVsComputer, loadGameData = null) {
       player2.sendAttack()
       // Render the change
       helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
-      // Update turn counter and toggle indicators
-      helpersDOM.toggleTurnIndicator()
-      turnCounter += 1
       if (turnPlayer.homeBoard.areAllSunk()) {
         // Break out of loop with a truthy return upon win condition
         return true
@@ -108,8 +105,10 @@ async function game(isVsComputer, loadGameData = null) {
     }
 
     // If 2 player mode, prepare for handover
-    // TODO Handover screen
+    turnCounter += 1
     turnPlayer = turnCounter % 2 ? player2 : player1
+    await helpersDOM.openHandoverScreen(2000, `Time for admiral ${turnCounter % 2 ? '2' : '1'}'s next move!`)
+    helpersDOM.toggleTurnIndicator()
     helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
     return false
   }

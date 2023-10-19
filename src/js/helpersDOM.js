@@ -15,6 +15,14 @@ const helpersDOM = {
     })
   },
 
+  renderBlankBoards: function renderBlankBoards() {
+    const cells = document.querySelectorAll('.board>*')
+    cells.forEach((cell) => {
+      cell.classList.remove('ship', 'hit', 'miss')
+      cell.classList.add('cell', 'empty')
+    })
+  },
+
   delegateAttackClick: function delegateAttackClick(event, turnPlayer) {
     if (!event.target.classList.contains('cell')) {
       throw new Error('Click was not on a cell')
@@ -169,6 +177,39 @@ const helpersDOM = {
       // Add the click listener to be waited on
       enemyWaters.addEventListener('click', clickHandler)
       newGameBtn.addEventListener('click', interruptHandler)
+    })
+  },
+
+  openHandoverScreen: async function openHandoverScreen(delay, message) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay)
+    })
+
+    helpersDOM.renderBlankBoards()
+
+    const wrapper = document.createElement('div')
+    wrapper.classList.add('handover-wrapper')
+    const handover = document.createElement('div')
+    handover.classList.add('handover-modal')
+
+    // Create the message element with close button
+    const messageElement = document.createElement('p')
+    messageElement.classList.add('handover-message')
+    messageElement.innerText = message
+    const btn = document.createElement('button')
+    btn.classList.add('handover-button')
+    btn.innerText = 'Click to continue'
+
+    handover.appendChild(messageElement)
+    handover.appendChild(btn)
+    wrapper.appendChild(handover)
+    document.body.appendChild(wrapper)
+
+    return new Promise((resolve) => {
+      btn.addEventListener('click', () => {
+        wrapper.remove()
+        resolve()
+      })
     })
   }
 }
