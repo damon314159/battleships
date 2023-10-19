@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 const helpersDOM = {
   renderBoards: function renderBoards(turnPlayer, homeWaters, enemyWaters) {
     const homeBoardCells = homeWaters.querySelectorAll('.board>*')
@@ -128,6 +129,22 @@ const helpersDOM = {
       // Add the click listener to be waited on
       homeWaters.addEventListener('click', clickHandler)
     })
+  },
+
+  awaitValidPlacement: async function awaitValidPlacement(player, ship, homeWaters) {
+    const hoverCallback = (event) => helpersDOM.highlightShipPlacement(event, player, ship)
+    const unhoverCallback = (event) => helpersDOM.clearHighlight(event)
+    homeWaters.addEventListener('mouseover', hoverCallback)
+    homeWaters.addEventListener('mouseout', unhoverCallback)
+    for (;;) {
+      const event = await helpersDOM.waitForPlacement(homeWaters)
+      // Break on true return, signify successful placement
+      if (helpersDOM.delegatePlaceClick(event, player, ship)) {
+        homeWaters.removeEventListener('mouseover', hoverCallback)
+        homeWaters.removeEventListener('mouseover', unhoverCallback)
+        break
+      }
+    }
   },
 
   waitForAttack: function waitForAttack(enemyWaters) {

@@ -3,6 +3,7 @@ import Player from './Player'
 import Gameboard from './Gameboard'
 import Ship from './Ship'
 import helpersDOM from './helpersDOM'
+import reconstructLoad from './reconstructLoad'
 
 // All pre-game setup and instantiation
 async function game(isVsComputer, loadGameData = null) {
@@ -14,34 +15,29 @@ async function game(isVsComputer, loadGameData = null) {
   const player1 = new Player(board1, board2, false)
   const player2 = new Player(board2, board1, isVsComputer)
 
-  let turnPlayer = player1
-  let turnCounter = 0
-
-  async function awaitValidPlacement(player, ship) {
-    for (;;) {
-      const hoverCallback = (event) => helpersDOM.highlightShipPlacement(event, player, ship)
-      const unhoverCallback = (event) => helpersDOM.clearHighlight(event)
-      homeWaters.addEventListener('mouseover', hoverCallback)
-      homeWaters.addEventListener('mouseout', unhoverCallback)
-      const event = await helpersDOM.waitForPlacement(homeWaters)
-      // Break on true return, signify successful placement
-      if (helpersDOM.delegatePlaceClick(event, player, ship)) {
-        homeWaters.removeEventListener('mouseover', hoverCallback)
-        homeWaters.removeEventListener('mouseover', unhoverCallback)
-        break
-      }
-    }
-  }
   const player1Ships = [new Ship(5), new Ship(4), new Ship(3), new Ship(3), new Ship(2)]
   const player2Ships = [new Ship(5), new Ship(4), new Ship(3), new Ship(3), new Ship(2)]
 
+  let turnPlayer = player1
+  let turnCounter = 0
+
   if (loadGameData) {
-    // TODO If storedData, enable load game button
-    // take gameboard.hits/grid from local storage when load game,
-    // to replace instantiated objects arrays with
+    // Take game state objects from local storage when a game is loaded.
+    // Then copy the data onto the new class instances.
+    // Then return and set the gameplay variables via destructuring
+    ;({ turnPlayer, turnCounter } = reconstructLoad(
+      loadGameData,
+      board1,
+      board2,
+      player1,
+      player2,
+      player1Ships,
+      player2Ships
+    ))
+    if (turnCounter % 2) helpersDOM.toggleTurnIndicator()
   } else {
     for (let i = 0; i < player1Ships.length; i += 1) {
-      await awaitValidPlacement(player1, player1Ships[i])
+      await helpersDOM.awaitValidPlacement(player1, player1Ships[i], homeWaters)
       helpersDOM.renderBoards(player1, homeWaters, enemyWaters)
     }
     if (player2.isAI) {
@@ -66,7 +62,7 @@ async function game(isVsComputer, loadGameData = null) {
       // TODO Handover screen
       helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
       for (let i = 0; i < player2Ships.length; i += 1) {
-        await awaitValidPlacement(player2, player2Ships[i])
+        await helpersDOM.awaitValidPlacement(player2, player2Ships[i], homeWaters)
         helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
       }
       // TODO Handover screen
@@ -118,6 +114,32 @@ async function game(isVsComputer, loadGameData = null) {
     return false
   }
 
+  function unloadHandler() {
+    // If the user would exit out of the unfinished game, store the game state
+    const gameState = {
+      gameplay: {
+        turnPlayer,
+        turnCounter
+      },
+      boards: {
+        board1,
+        board2
+      },
+      players: {
+        player1,
+        player2
+      },
+      ships: {
+        player1Ships,
+        player2Ships
+      }
+    }
+    localStorage.clear()
+    localStorage.setItem('gameState', JSON.stringify(gameState))
+  }
+
+  window.addEventListener('beforeunload', unloadHandler)
+
   // Setup concluded, start the turns
   for (;;) {
     try {
@@ -129,6 +151,9 @@ async function game(isVsComputer, loadGameData = null) {
       break
     }
   }
+
+  // If the game has ended, remove the unload-save listener
+  window.removeEventListener('beforeunload', unloadHandler)
 }
 
 export default game

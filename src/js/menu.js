@@ -20,11 +20,20 @@ const menu = {
     function startGame() {
       const isVsComputer = playerToggle.checked
       game(isVsComputer)
+      // Remove any existing save-game to keep LS tidy
+      localStorage.clear()
       closeModal()
     }
 
     function loadGame() {
-      // TODO Add load game logic here
+      const gameState = JSON.parse(localStorage.getItem('gameState'))
+      if (!gameState) {
+        alert('No saved game') // TODO proper no save message. Red border on button + dialogue?
+        return
+      }
+      game(gameState.players.player2.isAI, gameState)
+      // Remove the now loaded save-game to keep LS tidy
+      localStorage.clear()
       closeModal()
     }
 
