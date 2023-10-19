@@ -1,20 +1,23 @@
 const menu = {
   prepareMenu: function prepareMenu(game) {
-    const openOptionsBtn = document.getElementById('openOptionsBtn')
-    const closeModalBtn = document.getElementById('closeModal')
-    const newGameBtn = document.getElementById('newGameBtn')
-    const loadGameBtn = document.getElementById('loadGameBtn')
-    const infoBtn = document.getElementById('infoBtn')
-    const playerToggle = document.getElementById('playerToggle')
-    const optionsModal = document.getElementById('optionsModal')
+    const openOptionsBtn = document.getElementById('open-options-btn')
+    const closeOptionsModalBtn = document.getElementById('close-options-modal')
+    const newGameBtn = document.getElementById('new-game-btn')
+    const loadGameBtn = document.getElementById('load-game-btn')
+    const infoBtn = document.getElementById('info-btn')
+    const playerToggle = document.getElementById('player-toggle')
+    const optionsModal = document.getElementById('options-modal')
+    const infoModal = document.getElementById('info-modal')
+    const closeInfoModalBtn = document.getElementById('close-info-modal')
+    const closeNoSavedDropdown = document.getElementById('no-saved-game-dropdown')
 
-    function openModal() {
-      optionsModal.style.display = 'block'
+    function openModal(modal) {
+      modal.style.display = 'block'
       // Check local storage to determine if loadGame button enabled
     }
 
-    function closeModal() {
-      optionsModal.style.display = 'none'
+    function closeModal(modal) {
+      modal.style.display = 'none'
     }
 
     function startGame() {
@@ -22,34 +25,38 @@ const menu = {
       game(isVsComputer)
       // Remove any existing save-game to keep LS tidy
       localStorage.clear()
-      closeModal()
+      closeModal(optionsModal)
+    }
+
+    function showDropdown() {
+      document.getElementById('no-saved-game-dropdown').style.display = 'block'
+    }
+    function closeDropdown() {
+      document.getElementById('no-saved-game-dropdown').style.display = 'none'
     }
 
     function loadGame() {
       const gameState = JSON.parse(localStorage.getItem('gameState'))
       if (!gameState) {
-        // TODO proper no save message. Red border on button + dialogue?
-        alert('No saved game')
+        showDropdown()
         return
       }
       game(gameState.players.player2.isAI, gameState)
       // Remove the now loaded save-game to keep LS tidy
       localStorage.clear()
-      closeModal()
+      closeModal(optionsModal)
     }
 
-    function showInfo() {
-      // TODO Add info display logic here
-    }
-
-    openOptionsBtn.addEventListener('click', openModal)
-    closeModalBtn.addEventListener('click', closeModal)
+    openOptionsBtn.addEventListener('click', () => openModal(optionsModal))
+    closeOptionsModalBtn.addEventListener('click', () => closeModal(optionsModal))
     newGameBtn.addEventListener('click', startGame)
     loadGameBtn.addEventListener('click', loadGame)
-    infoBtn.addEventListener('click', showInfo)
+    infoBtn.addEventListener('click', () => openModal(infoModal))
+    closeInfoModalBtn.addEventListener('click', () => closeModal(infoModal))
+    closeNoSavedDropdown.addEventListener('click', closeDropdown)
 
     // Start with menu visible
-    openModal()
+    openModal(optionsModal)
   }
 }
 
