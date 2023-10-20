@@ -151,15 +151,29 @@ const helpersDOM = {
 
   // Create a promise for a click event when placing ships on home waters
   waitForPlacement: function waitForPlacement(homeWaters) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      const newGameBtn = document.getElementById('new-game-btn')
       const clickHandler = (event) => {
         // The promise will only be resolved when the handler is triggered
         homeWaters.removeEventListener('click', clickHandler)
+        // eslint-disable-next-line no-use-before-define
+        newGameBtn.removeEventListener('click', interruptHandler)
         resolve(event)
+      }
+
+      // Add a way to interrupt the game-loop while async
+      // This is required if a new game were to be started,
+      // such that the old one can be cancelled
+      const interruptHandler = () => {
+        newGameBtn.removeEventListener('click', interruptHandler)
+        homeWaters.removeEventListener('click', clickHandler)
+
+        reject(new Error('Interrupt requested'))
       }
 
       // Add the click listener to be waited on
       homeWaters.addEventListener('click', clickHandler)
+      newGameBtn.addEventListener('click', interruptHandler)
     })
   },
 
@@ -173,12 +187,20 @@ const helpersDOM = {
     homeWaters.addEventListener('mouseout', unhoverCallback)
     // Infinite loop so that unsuccessful placement clicks can be reattempted
     for (;;) {
-      const event = await helpersDOM.waitForPlacement(homeWaters)
-      if (helpersDOM.delegatePlaceClick(event, player, ship)) {
-        // Break on true return, signifying a successful placement
+      try {
+        const event = await helpersDOM.waitForPlacement(homeWaters)
+        if (helpersDOM.delegatePlaceClick(event, player, ship)) {
+          // Break on true return, signifying a successful placement
+          homeWaters.removeEventListener('mouseover', hoverCallback)
+          homeWaters.removeEventListener('mouseover', unhoverCallback)
+          break
+        }
+      } catch (error) {
+        // If the loop was interrupted by a new game start, remove the hover effects
         homeWaters.removeEventListener('mouseover', hoverCallback)
         homeWaters.removeEventListener('mouseover', unhoverCallback)
-        break
+        // Then pass the error back to the game-loop so it can cancel the old game
+        throw error
       }
     }
   },
@@ -186,7 +208,7 @@ const helpersDOM = {
   // Create a promise for a click event when attacking enemy waters
   waitForAttack: function waitForAttack(enemyWaters) {
     return new Promise((resolve, reject) => {
-      const newGameBtn = document.getElementById('newGameBtn')
+      const newGameBtn = document.getElementById('new-game-btn')
 
       const clickHandler = (event) => {
         // Remove the event listener to avoid multiple resolutions

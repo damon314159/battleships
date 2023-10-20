@@ -40,11 +40,16 @@ async function game(isVsComputer, loadGameData = null) {
     if (turnCounter % 2) helpersDOM.toggleTurnIndicator()
   } else {
     // Else we are in a new game and the ship placement should begin
-    await helpersDOM.openHandoverScreen(2000, 'Time for admiral 1 to organise their fleet!')
+    await helpersDOM.openHandoverScreen(1000, 'Time for admiral 1 to organise their fleet!')
     // A brief pause and then loop through the ships for player 1 to place
     for (let i = 0; i < player1Ships.length; i += 1) {
-      await helpersDOM.awaitValidPlacement(player1, player1Ships[i], homeWaters)
-      helpersDOM.renderBoards(player1, homeWaters, enemyWaters)
+      try {
+        await helpersDOM.awaitValidPlacement(player1, player1Ships[i], homeWaters)
+        helpersDOM.renderBoards(player1, homeWaters, enemyWaters)
+      } catch {
+        // If an interrupt is thrown, a new game has been started, so quit this game
+        return
+      }
     }
     if (player2.isAI) {
       // If this is single player mode, the computer will need to randomly place their ships
@@ -73,16 +78,21 @@ async function game(isVsComputer, loadGameData = null) {
       await helpersDOM.openHandoverScreen(2000, 'Time for admiral 2 to organise their fleet!')
       helpersDOM.toggleTurnIndicator()
       helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
-      for (let i = 0; i < player2Ships.length; i += 1) {
-        await helpersDOM.awaitValidPlacement(player2, player2Ships[i], homeWaters)
-        helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
-      }
 
-      // Once all the ships are down, its time to pass back to player 1
-      await helpersDOM.openHandoverScreen(2000, `Let the game begin! Admiral 1's turn`)
+      for (let i = 0; i < player2Ships.length; i += 1) {
+        try {
+          await helpersDOM.awaitValidPlacement(player2, player2Ships[i], homeWaters)
+          helpersDOM.renderBoards(player2, homeWaters, enemyWaters)
+        } catch {
+          // If an interrupt is thrown, a new game has been started, so quit this game
+          return
+        }
+      }
       helpersDOM.toggleTurnIndicator()
     }
   }
+  // Once all the ships are down, its time to pass back to player 1
+  await helpersDOM.openHandoverScreen(2000, `Let the game begin! Admiral 1's turn`)
 
   // A final render, ready to start the game
   helpersDOM.renderBoards(turnPlayer, homeWaters, enemyWaters)
@@ -107,6 +117,10 @@ async function game(isVsComputer, loadGameData = null) {
 
     // If computer player, generate a move now
     if (player2.isAI) {
+      // A brief pause to let the user observe the result of their own turn
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2000)
+      })
       // Send an attack
       player2.sendAttack()
       // Render the change
