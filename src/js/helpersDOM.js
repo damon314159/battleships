@@ -56,12 +56,6 @@ const helpersDOM = {
     }
   },
 
-  toggleTurnIndicator: function toggleTurnIndicator() {
-    document.querySelectorAll('.turn-indicator').forEach((el) => {
-      el.classList.toggle('hidden')
-    })
-  },
-
   // Apply the ship class to a cell if it contains a reference to a ship object
   markShip: function markShip(cell, gameboard, r, c) {
     cell.classList.remove('ship')
