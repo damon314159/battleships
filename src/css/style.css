@@ -5,7 +5,22 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
+  background-color: #cdcdcd;
+}
+
+button {
+  padding: 10px 15px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #2980b9;
 }
 
 .hidden {
@@ -15,62 +30,72 @@ body {
 .game-container {
   display: flex;
   margin-top: 20px;
+  background-color: #ecf0f1;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px;
 }
 
 .board {
   display: grid;
   grid-template-columns: repeat(10, 40px);
   grid-gap: 5px;
-  border: 1px solid #ccc;
   margin: 10px;
 }
 
 .cell {
+  box-sizing: border-box;
   width: 40px;
   height: 40px;
-  border: 1px solid #ddd;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 12px;
+  border-radius: 5px;
 }
 
 .cell.empty {
-  background-color: #add8e6;
+  background-color: #6ddaff;
 }
 
 .cell.ship {
-  background-color: #556b2f;
+  background-color: #6a6a6a;
 }
 
 .cell.hit {
-  background-color: #ff6347;
+  background-color: #ff5739;
 }
 
 .cell.miss {
-  background-color: #87ceeb;
+  background-color: #d1f2ff;
+  border: 1px #6ddaff solid;
 }
 
 .cell.valid-place {
-  box-sizing: border-box;
   border: 3px green solid;
 }
 
 .cell.invalid-place {
-  box-sizing: border-box;
   border: 3px red solid;
-}
-
-.ship {
-  background-color: #556b2f;
-  width: 40px;
-  height: 40px;
-  border: 1px solid #333;
 }
 
 .turn-indicator {
   font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #3498db;
+}
+
+.waters-indicator {
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 10px;
 }
@@ -83,11 +108,11 @@ body {
 }
 
 #home-waters {
-  margin-right: 20px;
+  margin-right: 15px;
 }
 
 #enemy-waters {
-  margin-left: 20px;
+  margin-left: 15px;
 }
 
 .modal {
@@ -108,7 +133,13 @@ body {
   margin: 10% auto;
   padding: 20px;
   border: 1px solid #888;
+  height: 45%;
   width: 80%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 800px;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .close {
@@ -125,19 +156,50 @@ body {
   cursor: pointer;
 }
 
+.menu-modal {
+  text-align: center;
+}
+
+.menu-modal .button-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  height: calc(100% - 5rem);
+}
+
+.menu-modal button {
+  width: 40%;
+}
+.menu-modal .new-game-wrapper {
+  display: flex;
+  gap: 1rem;
+  width: 40%;
+}
+
+.menu-modal .new-game-wrapper button {
+  flex: 1 1 max-content;
+  height: 100%;
+}
+
 .dropdown {
+  width: 100%;
   position: relative;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
 }
 
 .dropdown-content {
   display: none;
   position: absolute;
+  top: 2rem;
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 10px;
   border-radius: 5px;
   z-index: 1;
+  min-width: 120px;
 }
 
 .handover-wrapper {
@@ -168,20 +230,31 @@ body {
   margin-bottom: 20px;
 }
 
-.handover-button {
-  background: #4caf50;
-  color: white;
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.handover-button:hover {
-  background: #45a049;
-}
-
 a {
   color: rgb(0, 44, 94);
+}
+
+.cell:hover {
+  filter: brightness(110%);
+}
+
+@media screen and (max-width: 1023px) {
+  body::before {
+    content: 'Battleships \a\a Please play on a computer';
+    white-space: pre;
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ecf0f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
 }

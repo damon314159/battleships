@@ -8,25 +8,29 @@
   <body>
     <button id="open-options-btn">Options</button>
     <div id="options-modal" class="modal">
-      <div class="modal-content">
+      <div class="modal-content menu-modal">
         <span class="close" id="close-options-modal">&times;</span>
         <h2>Game Options</h2>
-        <label> <input type="checkbox" id="player-toggle" /> Single player Mode </label>
-        <button id="new-game-btn">New Game</button>
-        <div class="dropdown">
-          <button id="load-game-btn">Load Game</button>
-          <div id="no-saved-game-dropdown" class="dropdown-content">
-            <button id="close-no-load-btn">&times;</button>
-            <p>No save file found</p>
+        <div class="button-panel">
+          <div class="new-game-wrapper">
+            <button id="player-toggle" data-checked="true">Single player Mode</button>
+            <button id="new-game-btn">New Game</button>
           </div>
+          <div class="dropdown">
+            <button id="load-game-btn">Load Game</button>
+            <div id="no-saved-game-dropdown" class="dropdown-content">
+              <button id="close-no-load-btn">&times;</button>
+              <p>No save file found</p>
+            </div>
+          </div>
+          <button id="info-btn">Info</button>
         </div>
-        <button id="info-btn">Info</button>
       </div>
     </div>
     <div id="info-modal" class="modal">
       <div class="modal-content">
         <span class="close" id="close-info-modal">&times;</span>
-        <h2>Game Info</h2>
+        <h2>Intro</h2>
         <p>
           Welcome to Battleships, where strategic prowess and naval mastery collide! In this thrilling naval combat
           game, you command a fleet of powerful battleships, cruisers, and submarines, engaging in intense maritime
@@ -35,37 +39,36 @@
           and outmanoeuvre your adversaries to claim victory on the high seas. Whether you're a seasoned admiral or a
           novice tactician, Battleships offers an immersive and strategic gaming experience. May the wind be in your
           sails and your torpedoes find their mark!
-          <br /><br />
-          The first watery grid is your own. Click on it to place your ships at the start of the game. (Hold shift to
-          change direction). <br />
-          The second grid is that of your enemy. Once all the ships are placed, launch attacks by clicking on one of
-          your opponent's grid cells. <br /><br />
-          Created by <a href="https://github.com/damon314159">Damon</a>
         </p>
+        <h2>Instructions</h2>
+        <ul>
+          <li>
+            The first watery grid is your own. Click on it to place your ships at the start of the game. (Hold shift to
+            change direction).
+          </li>
+          <li>
+            The second grid is that of your enemy. Once all the ships are placed, launch attacks by clicking on one of
+            your opponent's grid cells.
+          </li>
+          <li>
+            A handover screen will tell you when it is time to pass the device to your opponent in two player mode
+          </li>
+        </ul>
+        <p>Created by <a href="https://github.com/damon314159">Damon</a></p>
       </div>
     </div>
 
-    <div class="turn-indicator-wrapper wrapper">
-      <div class="turn-indicator">Admiral 1's Turn</div>
-      <div class="turn-indicator hidden">Admiral 2's Turn</div>
-    </div>
     <div class="game-container">
       <div id="home-waters" class="game-board">
         <h3 class="waters-indicator">Home Waters</h3>
         <div id="home-board" class="board">
           <!-- Home waters -->
         </div>
-        <div id="home-ships">
-          <!-- Home's ships will be placed here dynamically -->
-        </div>
       </div>
       <div id="enemy-waters" class="game-board">
         <h3 class="waters-indicator">Enemy Waters</h3>
         <div id="enemy-board" class="board">
           <!-- Enemy waters -->
-        </div>
-        <div id="enemy-ships">
-          <!-- Enemy's ships will be placed here dynamically -->
         </div>
       </div>
     </div>

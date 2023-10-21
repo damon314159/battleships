@@ -28,7 +28,7 @@ const menu = {
 
     function startGame() {
       // Read user input on single player vs two player
-      const isVsComputer = playerToggle.checked
+      const isVsComputer = playerToggle.dataset.checked === 'true'
       // Begin the new game
       game(isVsComputer)
       // Remove any existing save-game to keep LS tidy
@@ -51,6 +51,18 @@ const menu = {
       closeModal(optionsModal)
     }
 
+    function updatePlayerToggle() {
+      const isChecked = playerToggle.dataset.checked === 'true'
+
+      if (isChecked) {
+        playerToggle.textContent = 'Two player Mode'
+      } else {
+        playerToggle.textContent = 'Single player Mode'
+      }
+
+      playerToggle.dataset.checked = !isChecked
+    }
+
     // Attach all functions to their appropriate menu controls
     openOptionsBtn.addEventListener('click', () => openModal(optionsModal))
     closeOptionsModalBtn.addEventListener('click', () => closeModal(optionsModal))
@@ -59,6 +71,7 @@ const menu = {
     infoBtn.addEventListener('click', () => openModal(infoModal))
     closeInfoModalBtn.addEventListener('click', () => closeModal(infoModal))
     closeNoSavedDropdown.addEventListener('click', closeDropdown)
+    playerToggle.addEventListener('click', updatePlayerToggle)
 
     // Start with menu visible
     openModal(optionsModal)
